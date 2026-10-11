@@ -14,7 +14,7 @@
       height: 100%; 
       overflow: hidden; 
       color: #fff;
-      background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), 
+      background: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), 
                   url('bg-minecraft.jpg') no-repeat center center fixed;
       background-size: cover;
     }
@@ -62,12 +62,13 @@
     }
 
     .panel {
-      background: rgba(12, 12, 12, 0.6);
+      background: rgba(12, 12, 12, 0.4);
       border-right: 2px solid rgba(255, 255, 255, 0.1);
       display: flex;
       flex-direction: column;
       padding: 15px;
       overflow-y: auto;
+      backdrop-filter: blur(2px);
     }
     .right-panel { border-left: 2px solid rgba(255, 255, 255, 0.1); border-right: none; }
 
@@ -76,65 +77,102 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 35px;
-      background: rgba(0, 0, 0, 0.35);
+      padding: 30px;
+      background: transparent;
       overflow-y: auto;
     }
+    
+    /* Highly Transparent Story Box */
     .story-box {
-      background: rgba(10, 10, 10, 0.75);
-      border: 4px ridge #777;
-      padding: 25px;
+      background: rgba(10, 10, 10, 0.45);
+      border: 2px solid rgba(243, 156, 18, 0.6);
+      padding: 22px;
       border-radius: 6px;
-      min-height: 220px;
+      min-height: 180px;
       font-size: 1.15rem;
       line-height: 1.6;
-      margin-bottom: 25px;
+      margin-bottom: 15px;
+      backdrop-filter: blur(3px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
+
+    /* Dice Prompt Banner */
+    .dice-prompt-banner {
+      background: rgba(142, 68, 173, 0.4);
+      border: 1px dashed rgba(245, 176, 65, 0.8);
+      padding: 8px 12px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+      color: #f5b041;
+      text-align: center;
+      backdrop-filter: blur(3px);
+    }
+
     .options-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 12px;
-      margin-bottom: 15px;
+      gap: 10px;
+      margin-bottom: 10px;
     }
+
+    /* Highly Transparent Option Buttons */
     .option-btn {
-      background: rgba(30, 39, 46, 0.85); border: 2px solid #485460; color: #fff;
-      padding: 14px; text-align: left; cursor: pointer; font-size: 1rem; border-radius: 4px;
+      background: rgba(20, 25, 30, 0.5);
+      border: 2px solid rgba(120, 140, 160, 0.5);
+      color: #fff;
+      padding: 12px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 1rem;
+      border-radius: 4px;
+      backdrop-filter: blur(3px);
       transition: all 0.2s ease;
     }
-    .option-btn:hover { background: rgba(47, 54, 64, 0.95); border-color: #f39c12; }
+    .option-btn:hover { 
+      background: rgba(47, 54, 64, 0.75); 
+      border-color: #f39c12; 
+      transform: translateX(4px);
+    }
 
-    /* Dice Roller Widget */
+    /* Enhanced Dice Roller Widget */
     .dice-widget {
-      background: rgba(25, 25, 25, 0.8);
+      background: rgba(25, 25, 25, 0.55);
       border: 2px dashed #f39c12;
       padding: 15px;
       text-align: center;
       border-radius: 6px;
       margin-top: auto;
+      backdrop-filter: blur(3px);
     }
     #dice-display {
-      font-size: 2.8rem;
+      font-size: 3rem;
       margin: 10px 0;
       color: #f39c12;
       font-weight: bold;
+      text-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
     }
-    .shake { animation: shakeAnim 0.4s ease-in-out; }
-    @keyframes shakeAnim {
-      0% { transform: translate(0, 0) rotate(0deg); }
-      25% { transform: translate(-4px, 2px) rotate(-3deg); }
-      50% { transform: translate(4px, -2px) rotate(3deg); }
-      75% { transform: translate(-2px, -1px) rotate(-1deg); }
-      100% { transform: translate(0, 0) rotate(0deg); }
+    
+    .dice-rolling {
+      animation: diceRollAnim 0.5s ease-in-out;
+    }
+    @keyframes diceRollAnim {
+      0% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.25) rotate(-15deg); }
+      50% { transform: scale(0.9) rotate(15deg); }
+      75% { transform: scale(1.15) rotate(-5deg); }
+      100% { transform: scale(1) rotate(0deg); }
     }
 
     /* Chat Styling */
     .chat-box {
-      flex: 1; background: rgba(5, 5, 5, 0.7); border: 1px solid rgba(255, 255, 255, 0.15);
+      flex: 1; background: rgba(5, 5, 5, 0.45); border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 4px; padding: 10px; overflow-y: auto; margin-bottom: 10px;
       font-size: 0.85rem; max-height: calc(100vh - 180px);
+      backdrop-filter: blur(3px);
     }
     .chat-input-area { display: flex; gap: 5px; }
-    .chat-input-area input { flex: 1; padding: 9px; background: rgba(17, 17, 17, 0.9); border: 1px solid #444; color: #fff; border-radius: 3px; }
+    .chat-input-area input { flex: 1; padding: 9px; background: rgba(17, 17, 17, 0.8); border: 1px solid #444; color: #fff; border-radius: 3px; }
     .chat-input-area button { padding: 9px 14px; background: #27ae60; border: none; color: #fff; cursor: pointer; border-radius: 3px; }
     .party-member { padding: 6px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.9rem; color: #dcdde1; }
   </style>
@@ -185,11 +223,12 @@
     <!-- Center Narrative Frame -->
     <div class="center-frame">
       <div>
-        <h2 id="room-title" style="color: #f39c12; margin-bottom: 12px;">Room: Loading...</h2>
+        <h2 id="room-title" style="color: #f39c12; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">Room: Loading...</h2>
+        <div class="dice-prompt-banner" id="dice-prompt">⚠️ <b>When to roll:</b> Roll your d20 before casting votes to check if your character passes the room check (Target: 12+)</div>
         <div class="story-box" id="story-text">Waiting for dungeon master initialization...</div>
       </div>
       <div>
-        <h4 style="margin-bottom: 10px; color: #bdc3c7;">Available Actions (Majority Rules):</h4>
+        <h4 style="margin-bottom: 8px; color: #bdc3c7; text-shadow: 1px 1px 2px rgba(0,0,0,0.9);">Available Actions (Majority Rules):</h4>
         <div class="options-grid" id="options-container"></div>
       </div>
     </div>
@@ -252,6 +291,9 @@
       document.getElementById('room-title').innerText = `Room: ${state.room}`;
       document.getElementById('story-text').innerText = state.story;
       
+      // Keep persistent guidance banner active
+      document.getElementById('dice-prompt').innerHTML = `⚠️ <b>When to roll:</b> Roll a d20 to check check success before voting! (Target: 12+)`;
+
       const optContainer = document.getElementById('options-container');
       optContainer.innerHTML = '';
       state.options.forEach(opt => {
@@ -281,14 +323,18 @@
     function rollDice() {
       const roll = Math.floor(Math.random() * 20) + 1;
       const display = document.getElementById('dice-display');
-      display.classList.add('shake');
-      setTimeout(() => display.classList.remove('shake'), 400);
+      
+      // Trigger upgraded rolling animation with scale bounce & rotation
+      display.classList.add('dice-rolling');
+      setTimeout(() => display.classList.remove('dice-rolling'), 500);
+
       socket.emit('roll_dice', { name: currentHero.name, roll });
     }
 
     socket.on('dice_rolled', (data) => {
       document.getElementById('dice-display').innerText = `🎲 ${data.roll}`;
-      appendSystemMessage(`${data.name} rolled a d20 and achieved a **${data.roll}**!`);
+      let outcome = data.roll >= 12 ? '✨ Success!' : '💥 Failure...';
+      appendSystemMessage(`${data.name} rolled a d20 and got **${data.roll}**! [${outcome}]`);
     });
 
     function sendChat() {
