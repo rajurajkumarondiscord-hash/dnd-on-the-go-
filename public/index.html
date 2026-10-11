@@ -9,7 +9,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
     body, html { width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff; }
 
-    /* Fixed Background Image */
+    /* Fixed Minecraft Background Image */
     #bg-image {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh;
@@ -21,7 +21,7 @@
     .screen {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(0, 0, 0, 0.85);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -30,7 +30,7 @@
     .hidden { display: none !important; }
 
     .card {
-      background: rgba(18, 18, 18, 0.85);
+      background: rgba(18, 18, 18, 0.92);
       border: 3px solid #555;
       padding: 30px;
       width: 360px;
@@ -41,7 +41,7 @@
     .card h2 { margin-bottom: 20px; color: #f39c12; }
     .card input, .card select {
       width: 100%; padding: 12px; margin: 10px 0;
-      background: rgba(17, 17, 17, 0.8); border: 1px solid #444; color: #fff; border-radius: 4px;
+      background: rgba(17, 17, 17, 0.9); border: 1px solid #444; color: #fff; border-radius: 4px;
     }
     .card button {
       width: 100%; padding: 12px; margin-top: 10px;
@@ -60,7 +60,7 @@
     }
 
     .panel {
-      background: rgba(12, 12, 12, 0.45);
+      background: rgba(12, 12, 12, 0.6);
       border-right: 2px solid rgba(255, 255, 255, 0.1);
       display: flex;
       flex-direction: column;
@@ -75,11 +75,11 @@
       flex-direction: column;
       justify-content: space-between;
       padding: 35px;
-      background: rgba(0, 0, 0, 0.25);
+      background: rgba(0, 0, 0, 0.35);
       overflow-y: auto;
     }
     .story-box {
-      background: rgba(10, 10, 10, 0.65);
+      background: rgba(10, 10, 10, 0.75);
       border: 4px ridge #777;
       padding: 25px;
       border-radius: 6px;
@@ -95,15 +95,15 @@
       margin-bottom: 15px;
     }
     .option-btn {
-      background: rgba(30, 39, 46, 0.75); border: 2px solid #485460; color: #fff;
+      background: rgba(30, 39, 46, 0.85); border: 2px solid #485460; color: #fff;
       padding: 14px; text-align: left; cursor: pointer; font-size: 1rem; border-radius: 4px;
       transition: all 0.2s ease;
     }
-    .option-btn:hover { background: rgba(47, 54, 64, 0.9); border-color: #f39c12; }
+    .option-btn:hover { background: rgba(47, 54, 64, 0.95); border-color: #f39c12; }
 
     /* Dice Roller Widget */
     .dice-widget {
-      background: rgba(25, 25, 25, 0.7);
+      background: rgba(25, 25, 25, 0.8);
       border: 2px dashed #f39c12;
       padding: 15px;
       text-align: center;
@@ -127,20 +127,20 @@
 
     /* Chat Styling */
     .chat-box {
-      flex: 1; background: rgba(5, 5, 5, 0.6); border: 1px solid rgba(255, 255, 255, 0.15);
+      flex: 1; background: rgba(5, 5, 5, 0.7); border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 4px; padding: 10px; overflow-y: auto; margin-bottom: 10px;
-      font-size: 0.85rem; max-height: calc(100vh - 150px);
+      font-size: 0.85rem; max-height: calc(100vh - 180px);
     }
     .chat-input-area { display: flex; gap: 5px; }
-    .chat-input-area input { flex: 1; padding: 9px; background: rgba(17, 17, 17, 0.8); border: 1px solid #444; color: #fff; border-radius: 3px; }
+    .chat-input-area input { flex: 1; padding: 9px; background: rgba(17, 17, 17, 0.9); border: 1px solid #444; color: #fff; border-radius: 3px; }
     .chat-input-area button { padding: 9px 14px; background: #27ae60; border: none; color: #fff; cursor: pointer; border-radius: 3px; }
     .party-member { padding: 6px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.9rem; color: #dcdde1; }
   </style>
 </head>
 <body>
 
-  <!-- Minecraft Custom Image Background -->
-  <img id="bg-image" src="https://images.unsplash.com/photo-1627856013091-fed6e4e30025?q=80&w=1920&auto=format&fit=crop" alt="Minecraft Campfire Background">
+  <!-- Minecraft Campfire Background Image -->
+  <img id="bg-image" src="https://images.unsplash.com/photo-1627856013091-fed6e4e30025?q=80&w=1920&auto=format&fit=crop" alt="Minecraft Background">
 
   <!-- AUTHENTICATION SCREEN -->
   <div id="auth-screen" class="screen">
@@ -287,4 +287,38 @@
       socket.emit('roll_dice', { name: currentHero.name, roll });
     }
 
-    socket
+    socket.on('dice_rolled', (data) => {
+      document.getElementById('dice-display').innerText = `🎲 ${data.roll}`;
+      appendSystemMessage(`${data.name} rolled a d20 and achieved a **${data.roll}**!`);
+    });
+
+    function sendChat() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if(!text) return;
+      socket.emit('send_chat', { sender: currentHero.name, text });
+      input.value = '';
+    }
+
+    function handleChatKey(e) {
+      if(e.key === 'Enter') sendChat();
+    }
+
+    socket.on('receive_chat', (data) => {
+      const chatBox = document.getElementById('chat-messages');
+      chatBox.innerHTML += `<div><b>${data.sender}:</b> ${data.text}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    socket.on('system_message', (msg) => {
+      appendSystemMessage(msg);
+    });
+
+    function appendSystemMessage(msg) {
+      const chatBox = document.getElementById('chat-messages');
+      chatBox.innerHTML += `<div style="color: #f39c12; font-style: italic; margin: 4px 0;">[System] ${msg}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  </script>
+</body>
+</html>
