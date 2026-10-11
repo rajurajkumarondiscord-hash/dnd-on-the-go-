@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dungeon Text - Real-Time Group RPG</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff; }
+
+    /* Transparent Minecraft/Game Background Video */
+    #bg-video {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      object-fit: cover;
+      z-index: -1;
+      opacity: 0.35; 
+    }
+
+    /* Modals & Screens */
+    .screen {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.88);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+    }
+    .hidden { display: none !important; }
+
+    .card {
+      background: rgba(18, 18, 18, 0.96);
+      border: 3px solid #666;
+      padding: 30px;
+      width: 360px;
+      border-radius: 8px;
+      box-shadow: 0 0 25px rgba(0,0,0,0.9);
+      text-align: center;
+    }
+    .card h2 { margin-bottom: 20px; color: #f39c12; }
+    .card input, .card select {
+      width: 100%; padding: 12px; margin: 10px 0;
+      background: #111; border: 1px solid #444; color: #fff; border-radius: 4px;
+    }
+    .card button {
+      width: 100%; padding: 12px; margin-top: 10px;
+      background: #d35400; border: none; color: #fff; font-weight: bold; cursor: pointer; border-radius: 4px;
+    }
+    .card button:hover { background: #e67e22; }
+    .toggle-link { margin-top: 15px; display: block; color: #3498db; cursor: pointer; font-size: 0.9rem; }
+
+    /* Main Grid Layout */
+    #game-container {
+      display: grid;
+      grid-template-columns: 280px 1fr 300px;
+      grid-template-rows: 100vh;
+      width: 100vw; height: 100vh;
+    }
+
+    .panel {
+      background: rgba(12, 12, 12, 0.88);
+      border-right: 2px solid #222;
+      display: flex;
+      flex-direction: column;
+      padding: 15px;
+      overflow-y: auto;
+    }
+    .right-panel { border-left: 2px solid #222; border-right: none; }
+
+    /* Central Story Window */
+    .center-frame {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 35px;
+      background: rgba(0, 0, 0, 0.7);
+      overflow-y: auto;
+    }
+    .story-box {
+      background: rgba(8, 8, 8, 0.92);
+      border: 4px ridge #777;
+      padding: 25px;
+      border-radius: 6px;
+      min-height: 220px;
+      font-size: 1.15rem;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+    .option-btn {
+      background: #1e272e; border: 2px solid #485460; color: #fff;
+      padding: 14px; text-align: left; cursor: pointer; font-size: 1rem; border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+    .option-btn:hover { background: #2f3640; border-color: #f39c12; }
+
+    /* Dice Roller Widget */
+    .dice-widget {
+      background: rgba(25, 25, 25, 0.95);
+      border: 2px dashed #f39c12;
+      padding: 15px;
+      text-align: center;
+      border-radius: 6px;
+      margin-top: auto;
+    }
+    #dice-display {
+      font-size: 2.8rem;
+      margin: 10px 0;
+      color: #f39c12;
+      font-weight: bold;
+    }
+    .shake { animation: shakeAnim 0.4s ease-in-out; }
+    @keyframes shakeAnim {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(-4px, 2px) rotate(-3deg); }
+      50% { transform: translate(4px, -2px) rotate(3deg); }
+      75% { transform: translate(-2px, -1px) rotate(-1deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    /* Chat Styling */
+    .chat-box {
+      flex: 1; background: #050505; border: 1px solid #222;
+      border-radius: 4px; padding: 10px; overflow-y: auto; margin-bottom: 10px;
+      font-size: 0.85rem; max-height: calc(100vh - 150px);
+    }
+    .chat-input-area { display: flex; gap: 5px; }
+    .chat-input-area input { flex: 1; padding: 9px; background: #111; border: 1px solid #444; color: #fff; border-radius: 3px; }
+    .chat-input-area button { padding: 9px 14px; background: #27ae60; border: none; color: #fff; cursor: pointer; border-radius: 3px; }
+    .party-member { padding: 6px 0; border-bottom: 1px solid #222; font-size: 0.9rem; color: #dcdde1; }
+  </style>
+</head>
+<body>
+
+  <!-- Minecraft/Gameplay Video Loop Background -->
+  <video autoplay muted loop id="bg-video">
+    <source src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-and-code-31910-large.mp4" type="video/mp4">
+  </video>
+
+  <!-- AUTHENTICATION SCREEN -->
+  <div id="auth-screen" class="screen">
+    <div class="card">
+      <h2 id="auth-title">Dungeon Login</h2>
+      <input type="text" id="username" placeholder="Username">
+      <input type="password" id="password" placeholder="Password">
+      <button id="auth-btn" onclick="handleAuth()">Log In</button>
+      <span class="toggle-link" onclick="toggleAuthMode()">Need an account? Register</span>
+    </div>
+  </div>
+
+  <!-- CHARACTER CREATION SCREEN -->
+  <div id="char-screen" class="screen hidden">
+    <div class="card" style="width: 400px;">
+      <h2>Create Your Hero</h2>
+      <input type="text" id="char-name" placeholder="Hero Name">
+      <select id="char-class">
+        <option value="Warrior">Warrior (High Defense & Might)</option>
+        <option value="Mage">Mage (Destructive Spells)</option>
+        <option value="Rogue">Rogue (Stealth & Traps)</option>
+        <option value="Cleric">Cleric (Healing & Light)</option>
+      </select>
+      <button onclick="submitCharacter()">Enter Dungeon Queue</button>
+    </div>
+  </div>
+
+  <!-- MAIN GAME UI -->
+  <div id="game-container" class="hidden">
+    
+    <!-- Left Sidebar: Roster & Dice -->
+    <div class="panel">
+      <h3>Party Roster</h3>
+      <div id="party-list" style="margin-top: 10px; margin-bottom: 20px;"></div>
+      
+      <div class="dice-widget">
+        <h4>Party Dice Roller</h4>
+        <div id="dice-display">🎲 20</div>
+        <button onclick="rollDice()" style="background:#8e44ad; border:none; color:#fff; padding:10px; width:100%; cursor:pointer; border-radius:4px;">Roll d20</button>
+      </div>
+    </div>
+
+    <!-- Center Narrative Frame -->
+    <div class="center-frame">
+      <div>
+        <h2 id="room-title" style="color: #f39c12; margin-bottom: 12px;">Room: Loading...</h2>
+        <div class="story-box" id="story-text">Waiting for dungeon master initialization...</div>
+      </div>
+      <div>
+        <h4 style="margin-bottom: 10px; color: #bdc3c7;">Available Actions (Majority Rules):</h4>
+        <div class="options-grid" id="options-container"></div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar: Live Chat -->
+    <div class="panel right-panel">
+      <h3>Party Chat</h3>
+      <div class="chat-box" id="chat-messages"></div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Discuss strategy..." onkeypress="handleChatKey(event)">
+        <button onclick="sendChat()">Send</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const socket = io();
+    let isRegistering = false;
+    let currentUser = null;
+    let currentHero = null;
+
+    function toggleAuthMode() {
+      isRegistering = !isRegistering;
+      document.getElementById('auth-title').innerText = isRegistering ? 'Register Account' : 'Dungeon Login';
+      document.getElementById('auth-btn').innerText = isRegistering ? 'Sign Up' : 'Log In';
+      document.querySelector('.toggle-link').innerText = isRegistering ? 'Already have an account? Log In' : 'Need an account? Register';
+    }
+
+    function handleAuth() {
+      const u = document.getElementById('username').value.trim();
+      const p = document.getElementById('password').value.trim();
+      if(!u || !p) return alert('Please enter both username and password.');
+
+      const eventName = isRegistering ? 'auth:register' : 'auth:login';
+      socket.emit(eventName, { username: u, password: p }, (res) => {
+        if(res.success) {
+          currentUser = u;
+          document.getElementById('auth-screen').classList.add('hidden');
+          document.getElementById('char-screen').classList.remove('hidden');
+        } else {
+          alert(res.message);
+        }
+      });
+    }
+
+    function submitCharacter() {
+      const name = document.getElementById('char-name').value.trim();
+      const heroClass = document.getElementById('char-class').value;
+      if(!name) return alert('Please give your hero a name!');
+
+      currentHero = { name, heroClass, user: currentUser };
+      document.getElementById('char-screen').classList.add('hidden');
+      document.getElementById('game-container').classList.remove('hidden');
+
+      socket.emit('join_game', currentHero);
+    }
+
+    socket.on('game_state', (state) => {
+      document.getElementById('room-title').innerText = `Room: ${state.room}`;
+      document.getElementById('story-text').innerText = state.story;
+      
+      const optContainer = document.getElementById('options-container');
+      optContainer.innerHTML = '';
+      state.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = opt.text;
+        btn.onclick = () => castVote(opt.id);
+        optContainer.appendChild(btn);
+      });
+    });
+
+    socket.on('party_update', (party) => {
+      const list = document.getElementById('party-list');
+      list.innerHTML = '';
+      party.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'party-member';
+        div.innerText = `${p.name} (${p.heroClass})`;
+        list.appendChild(div);
+      });
+    });
+
+    function castVote(optionId) {
+      socket.emit('cast_vote', { optionId, username: currentHero.name });
+    }
+
+    function rollDice() {
+      const roll = Math.floor(Math.random() * 20) + 1;
+      const display = document.getElementById('dice-display');
+      display.classList.add('shake');
+      setTimeout(() => display.classList.remove('shake'), 400);
+      socket.emit('roll_dice', { name: currentHero.name, roll });
+    }
+
+    socket.on('dice_rolled', (data) => {
+      document.getElementById('dice-display').innerText = `🎲 ${data.roll}`;
+      appendSystemMessage(`${data.name} rolled a d20 and achieved a **${data.roll}**!`);
+    });
+
+    function sendChat() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if(!text) return;
+      socket.emit('send_chat', { sender: currentHero.name, text });
+      input.value = '';
+    }
+
+    function handleChatKey(e) {
+      if(e.key === 'Enter') sendChat();
+    }
+
+    socket.on('receive_chat', (data) => {
+      const chatBox = document.getElementById('chat-messages');
+      chatBox.innerHTML += `<div><b>${data.sender}:</b> ${data.text}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    socket.on('system_message', (msg) => {
+      appendSystemMessage(msg);
+    });
+
+    function appendSystemMessage(msg) {
+      const chatBox = document.getElementById('chat-messages');
+      chatBox.innerHTML += `<div style="color: #f39c12; font-style: italic; margin: 4px 0;">[System] ${msg}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  </script>
+</body>
+</html>
