@@ -7,21 +7,23 @@
   <script src="/socket.io/socket.io.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
-    body, html { width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff; }
-
-    /* Fixed Minecraft Background Image */
-    #bg-image {
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      object-fit: cover;
-      z-index: -1;
+    
+    /* Reliable Body Background Image with Dark Overlay */
+    body, html { 
+      width: 100%; 
+      height: 100%; 
+      overflow: hidden; 
+      color: #fff;
+      background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), 
+                  url('https://images.unsplash.com/photo-1542224566-6e85f2e6772f?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
+      background-size: cover;
     }
 
     /* Modals & Screens */
     .screen {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.8);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -30,7 +32,7 @@
     .hidden { display: none !important; }
 
     .card {
-      background: rgba(18, 18, 18, 0.92);
+      background: rgba(18, 18, 18, 0.9);
       border: 3px solid #555;
       padding: 30px;
       width: 360px;
@@ -60,7 +62,7 @@
     }
 
     .panel {
-      background: rgba(12, 12, 12, 0.6);
+      background: rgba(12, 12, 12, 0.55);
       border-right: 2px solid rgba(255, 255, 255, 0.1);
       display: flex;
       flex-direction: column;
@@ -75,7 +77,7 @@
       flex-direction: column;
       justify-content: space-between;
       padding: 35px;
-      background: rgba(0, 0, 0, 0.35);
+      background: rgba(0, 0, 0, 0.3);
       overflow-y: auto;
     }
     .story-box {
@@ -138,9 +140,6 @@
   </style>
 </head>
 <body>
-
-  <!-- Minecraft Campfire Background Image -->
-  <img id="bg-image" src="https://images.unsplash.com/photo-1627856013091-fed6e4e30025?q=80&w=1920&auto=format&fit=crop" alt="Minecraft Background">
 
   <!-- AUTHENTICATION SCREEN -->
   <div id="auth-screen" class="screen">
